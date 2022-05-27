@@ -7,8 +7,7 @@ import inspect
 import sys
 import json
 from time import gmtime, strftime
-from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import TransportError
+import time
 
 import logging
 
@@ -55,43 +54,44 @@ else:
     tag="unset"
 #print ('=============')
 # read data from stdin
-for line in sys.stdin:
-    # remove enters
-    
-    line = line.strip()
-    #print (len(line))
-    # Convert json to object
-    jsonok = True
-    try:
-        # Read string to JSON
-        #print("3")
+while 1:
+    time.sleep(2)
+    for line in sys.stdin:
+        # remove enters
+        line = line.strip()
+        #print (len(line))
+        # Convert json to object
+        jsonok = True
+        try:
+            # Read string to JSON
+            #print("3")
+            if jsonok:
+                jsonInput=json.loads(line)
+                #print("3.1")
+        except ValueError as e:
+            jsonok=False
+        #print("4")
         if jsonok:
-            jsonInput=json.loads(line)
-            #print("3.1")
-    except ValueError as e:
-        jsonok=False
-    #print("4")
-    if jsonok:
-        #print ("jsonok")
-        if 'timestamp' in jsonInput:
-            # clean numbers in json
-            fix_floats(jsonInput)
-            # TODO microtime
-            timestamp = int(jsonInput['timestamp'])/1000
-            #create time index for elasticsearch / kibana
-            myindex = indexBase + str(strftime("%Y%m%d%H", gmtime(timestamp)))
-            # add iso time for kibana
-            jsonInput['isotime'] = strftime("%Y-%m-%dT%H:%M:%S%z", gmtime(timestamp))
-            # add tag as reference
-            jsonInput['tag'] = tag
-            #convert the object into a json string
-            es_body = json.dumps(jsonInput)
-            #print (es_body)
-            # Post the data to elasticsearch
-            try:
-                #post the line to es
-                logging.info(es_body)
-                #print("4.1")
+            #print ("jsonok")
+            if 'timestamp' in jsonInput:
+                # clean numbers in json
+                fix_floats(jsonInput)
+                # TODO microtime
+                timestamp = int(jsonInput['timestamp'])/1000
+                #create time index for elasticsearch / kibana
+                myindex = indexBase + str(strftime("%Y%m%d%H", gmtime(timestamp)))
+                # add iso time for kibana
+                jsonInput['isotime'] = strftime("%Y-%m-%dT%H:%M:%S%z", gmtime(timestamp))
+                # add tag as reference
+                jsonInput['tag'] = tag
+                #convert the object into a json string
+                es_body = json.dumps(jsonInput)
                 #print (es_body)
-            except TransportError as e:
-                print ("Error posting ",e.error)
+                # Post the data to elasticsearch
+                try:
+                    #post the line to es
+                    logging.info(es_body)
+                    #print("4.1")
+                    #print (es_body)
+                except TransportError as e:
+                    print ("Error posting ",e.error)

@@ -94,9 +94,12 @@ services:
   #           - kibana
   #       networks:
   #           - elk 
+#https://github.com/LianDuanTrain/Elastic/tree/main/1%20Introduction%20and%20Installation/dockerComposeEKLF
+
   tshark:
       build:
         context: tshark/
+      tty: true
       depends_on:
          - elasticsearch
          - kibana
@@ -104,7 +107,7 @@ services:
         - pcap:/data/pcap
         - ./scada.pcapng:/data/pcap/scada.pcapng:ro,Z
         - ./tshark/bin/tshark2es.py:/usr/bin/tshark2es.py
-        - ./tshark/bin/log-generator-0.0.2.jar:/var/log/java/log-generator-0.0.2.jar
+        - ./tshark/bin/log-generator.jar:/var/log/java/log-generator-0.0.2.jar
       networks:
         - elk
 
