@@ -2,38 +2,36 @@
 ## https://github.com/elastic/beats/blob/master/deploy/docker/filebeat.docker.yml
 #
 
+
+
+filebeat.inputs:
+
+- type: log
+  enabled: true
+  paths:
+    # - /home/qftan/Documents/logs/cip_swat_lit101.log
+    - /usr/share/filebeat/cip_swat_lit101.log
+  fields:
+    type: "LIT101"
+  fields_under_root: true
+
+
 filebeat.config:
   modules:
     path: ${path.config}/modules.d/*.yml
     reload.enabled: false
 
-filebeat.autodiscover:
-  providers:
-    - type: docker
-      templates:
-      - condition:
-            equals:
-              docker.container.name: docker-elk-main-tshark-1 
-        config:
-          - type: container
-            multiline.type: pattern
-            multiline.pattern: '^[[:space:]]+(at|\.{3})[[:space:]]+\b|^java.lang.RuntimeException:'
-            multiline.negate: false
-            multiline.match: after
-            paths:
-              - /var/lib/docker/containers/${data.docker.container.id}/*.log
-            encoding: utf-8
-
-
 processors:
 - add_locale:
       format: abbreviation
-- add_host_metadata: ~    
+- add_host_metadata: ~   
 
-output.elasticsearch:
-  hosts: ['http://elasticsearch:9200']
-  username: elastic
-  password: ${ELASTIC_PASSWORD}
+
+output.logstash:
+  hosts: ['localhost:5044']
+
+  # username: elastic
+  # password: ${ELASTIC_PASSWORD}
 
 ## HTTP endpoint for health checking
 ## https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html

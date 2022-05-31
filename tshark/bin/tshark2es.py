@@ -2,15 +2,14 @@
 
 # This script uses the output off "tshark -T ek" and
 # posts the output to elasticsearch
-
+#tshark -r /data/pcap/scada.pcapng -T ek | tshark2es.py  linwei 
+import requests
 import inspect
 import sys
 import json
 from time import gmtime, strftime
 import time
-
 import logging
-
 
 def fix_floats(data):
 
@@ -44,6 +43,14 @@ if len(sys.argv)!=2:
     print ("Usage " + sys.argv[0] + "<tag>")
     exit()
 
+
+# try:
+#     es =  Elasticsearch('http://localhost:9200')
+# except:
+#     print ("Could not connect to elasticsearch!")
+#     exit()
+
+
 # set the index base + doctype + tag
 indexBase = "tshark-"
 mydoctype = "pcap"
@@ -54,12 +61,16 @@ else:
     tag="unset"
 #print ('=============')
 # read data from stdin
+count = 0
+
+
 while 1:
     time.sleep(2)
+
     for line in sys.stdin:
         # remove enters
         line = line.strip()
-        #print (len(line))
+        print (len(line))
         # Convert json to object
         jsonok = True
         try:
@@ -70,7 +81,7 @@ while 1:
                 #print("3.1")
         except ValueError as e:
             jsonok=False
-        #print("4")
+        print("4")
         if jsonok:
             #print ("jsonok")
             if 'timestamp' in jsonInput:
@@ -86,11 +97,22 @@ while 1:
                 jsonInput['tag'] = tag
                 #convert the object into a json string
                 es_body = json.dumps(jsonInput)
-                #print (es_body)
+                print (es_body)
+                json_data = {
+                    'tags': [
+                        'opster',
+                        'elasticsearch',
+                    ],
+                    'date': '01-01-2020',
+                }
+                response = requests.put('localhost:9200/test_index2/_doc/3', headers={}, json=json_data, auth=('elastic', 'changeme'))
+                print (response)
                 # Post the data to elasticsearch
                 try:
                     #post the line to es
-                    logging.info(es_body)
+                    #res = es.index(index=myindex,id= count,  document=es_body)
+                    count = count+1
+                    #logging.info(es_body)
                     #print("4.1")
                     #print (es_body)
                 except TransportError as e:

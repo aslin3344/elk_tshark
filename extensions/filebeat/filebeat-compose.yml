@@ -18,6 +18,7 @@ services:
       - --strict.perms=false
     volumes:
       - ./extensions/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - ./extensions/filebeat/config/cip_swat_lit101.log:/usr/share/filebeat/cip_swat_lit101.log:ro,Z
       - type: bind
         source: /var/lib/docker/containers
         target: /var/lib/docker/containers

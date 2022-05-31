@@ -2,57 +2,83 @@ package logtest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+
+import javax.xml.bind.DatatypeConverter;
+
+
 
 public class logtest {
-	private static final Logger log = LoggerFactory.getLogger(logtest.class);
-    private static AtomicLong total = new AtomicLong(0);
+	private static int count = 0;
 
+	//tshark -r /data/pcap/scada.pcapng -T ek | jq '.' | java -jar log-generator-0.0.2.jar
+	
     public static void main(String[] args) throws InterruptedException, IOException {
+ 
 
-  
-        // init
-        log.trace("starting");
-        final long start = System.nanoTime();
-  
+            //String cmd = "tshark -r /data/pcap/scada.pcapng -T ek | jq '.'";
+            //String cmd = "C:\\Program Files\\Wireshark\\tshark.exe -r C:\\Users\\65935\\Downloads\\docker-elk-main\\tshark\\logtest\\log\\scada.pcapng -T ek"         
+            //Process p = Runtime.getRuntime().exec(cmd);
+            //BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+    	
+//            
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+          	StringBuilder everything = new StringBuilder();
+     	    String lineeach;
+     	    while( (lineeach = in.readLine()) != null) {
+     	       everything.append(lineeach);
+     	    }
+     	    System.out.print("---------everything-----------");
+     	    System.out.print( everything.toString());
 
-        // add shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                long elapsed_loop = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-          
-                log.trace("shutdown");
-            }
-        });
-        
-        //tshark -r /data/pcap/mypcap.pcap -T ek
-        
-        
-        
+     	    String every= everything.toString();
+     	    every= every.replaceAll("\\}\\{", "\\}\\}\\{\\{");
+     	    String[] parts = every.split("\\}\\{");
+     	    for (String part: parts){
+     	    	if (part.contains("_type") && part.contains("doc")){
+     	    		continue;
+     	    	}
+     	    	System.out.print( part);	
+     	    	System.out.print("\n");
+     	    	sendpacket( part);
+     	    }
 
-        // will be repeated every params.repeat milliseconds
-        do {
-        	System.out.print("start....");
-            LogExecutor executor = new LogExecutor(1);
-            
-            String line;
-            Process p = Runtime.getRuntime().exec("tshark -r /data/pcap/scada.pcapng -T ek");
-            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = in.readLine()) != null) {
-            	 //System.out.print(line);
-                // TODO: Handle input line
-                 executor.add(new PacketRequest(line));
-            }
-        
-            // wait the end
-            executor.finish();
-            Thread.sleep(1000);
-        } while (true);
+    }
+    
+    
+    public static void sendpacket(String data){
+    	try {
+    		URL url = new URL(String.format("http://192.168.65.2:9200/test_index2/_doc/%d",count));
+    		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+    		httpConn.setRequestMethod("PUT");
 
+    		httpConn.setRequestProperty("Content-Type", "application/json");
+
+    		byte[] message = ("elastic:changeme").getBytes("UTF-8");
+    		String basicAuth = DatatypeConverter.printBase64Binary(message);
+    		httpConn.setRequestProperty("Authorization", "Basic " + basicAuth);
+
+    		httpConn.setDoOutput(true);
+    		OutputStreamWriter writer = new OutputStreamWriter(httpConn.getOutputStream());
+    		writer.write(data);
+    		writer.flush();
+    		writer.close();
+    		httpConn.getOutputStream().close();
+
+    		InputStream responseStream = httpConn.getResponseCode() / 100 == 2
+    				? httpConn.getInputStream()
+    				: httpConn.getErrorStream();
+    		Scanner s = new Scanner(responseStream).useDelimiter("\\A");
+    		String response = s.hasNext() ? s.next() : "";
+    		System.out.println(response);
+	    }catch(Exception e) {
+	    	System.out.println(e);
+	    }
     }
 
 }
