@@ -102,6 +102,8 @@ services:
 #https://curlconverter.com/#python
 #./tshark -r /data/pcap/scada.pcapng -T ek | jq .
 #curl -XPUT -u elastic:changeme "host.docker.internal:9200/test_index1/_doc/1" -H "Content-Type: application/json" -d "{\"tags\": [\"opster\",\"elasticsearch\"],\"date\": \"01-01-2020\"}"
+#nslookup host.docker.internal
+
 
   tshark:
       build:
@@ -117,8 +119,6 @@ services:
         - ./tshark/bin/log-generator.jar:/var/log/java/log-generator-0.0.2.jar
       networks:
         - elk
-      ports:
-       - "6000:6000"
 
 networks:
   elk:
