@@ -103,7 +103,8 @@ services:
 #./tshark -r /data/pcap/scada.pcapng -T ek | jq .
 #curl -XPUT -u elastic:changeme "host.docker.internal:9200/test_index1/_doc/1" -H "Content-Type: application/json" -d "{\"tags\": [\"opster\",\"elasticsearch\"],\"date\": \"01-01-2020\"}"
 #nslookup host.docker.internal
-
+#https://opster.com/es-errors/unknown-key-for-create-index/
+#tshark -r /data/pcap/scada.pcapng -T ek | jq '.' | java -jar log-generator-0.0.2.jar
 
   tshark:
       build:

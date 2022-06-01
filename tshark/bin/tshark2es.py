@@ -105,7 +105,7 @@ while 1:
                     ],
                     'date': '01-01-2020',
                 }
-                response = requests.put('localhost:9200/test_index2/_doc/3', headers={}, json=json_data, auth=('elastic', 'changeme'))
+                response = requests.put('http://localhost:9200/test_index2/_doc/3', headers={}, json=json_data, auth=('elastic', 'changeme'))
                 print (response)
                 # Post the data to elasticsearch
                 try:

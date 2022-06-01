@@ -34,7 +34,7 @@ public class logtest {
      	       everything.append(lineeach);
      	    }
      	    System.out.print("---------everything-----------");
-     	    System.out.print( everything.toString());
+     	    //System.out.print( everything.toString());
 
      	    String every= everything.toString();
      	    every= every.replaceAll("\\}\\{", "\\}\\}\\{\\{");
@@ -43,8 +43,8 @@ public class logtest {
      	    	if (part.contains("_type") && part.contains("doc")){
      	    		continue;
      	    	}
-     	    	System.out.print( part);	
-     	    	System.out.print("\n");
+     	    	//System.out.print( part);	
+     	    	//System.out.print("\n");
      	    	sendpacket( part);
      	    }
 
@@ -54,6 +54,7 @@ public class logtest {
     public static void sendpacket(String data){
     	try {
     		URL url = new URL(String.format("http://192.168.65.2:9200/test_index2/_doc/%d",count));
+    		count+=1;
     		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
     		httpConn.setRequestMethod("PUT");
 
