@@ -5,8 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Scanner;
 
 import javax.xml.bind.DatatypeConverter;
@@ -22,7 +28,7 @@ public class logtest {
  
 
             //String cmd = "tshark -r /data/pcap/scada.pcapng -T ek | jq '.'";
-            //String cmd = "C:\\Program Files\\Wireshark\\tshark.exe -r C:\\Users\\65935\\Downloads\\docker-elk-main\\tshark\\logtest\\log\\scada.pcapng -T ek"         
+            //String cmd = "C:\\Program Files\\Wireshark\\tshark.exe -r C:\\Users\\65935\\Downloads\\docker-elk-main\\tshark\\logtest\\log\\scada.pcapng -T ek "     ;    
             //Process p = Runtime.getRuntime().exec(cmd);
             //BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
     	
@@ -37,14 +43,35 @@ public class logtest {
      	    //System.out.print( everything.toString());
 
      	    String every= everything.toString();
+     	    
+     	    
+        	    
      	    every= every.replaceAll("\\}\\{", "\\}\\}\\{\\{");
+
      	    String[] parts = every.split("\\}\\{");
      	    for (String part: parts){
      	    	if (part.contains("_type") && part.contains("doc")){
      	    		continue;
      	    	}
-     	    	//System.out.print( part);	
-     	    	//System.out.print("\n");
+     	    	
+     	    	
+     	    	int strart = part.indexOf("timestamp");
+     	    	if (strart >0) {
+     	    		int end = part.indexOf("\",");
+     	    		String timestring = part.substring(strart+12, end);
+
+     	    		Instant instant = Instant.ofEpochMilli(Long.parseLong(timestring));
+     	    		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+     	    		String dateAsText = fmt.format(instant.atZone(ZoneId.systemDefault())).toString();
+	     	    	part= part.replaceAll("timestamp", "@TimeStamp");
+	     	    	part= part.replaceAll(timestring, dateAsText);
+	     	    	System.out.print("\n");
+	     	    	
+     	    	}
+     	    	
+     	    	System.out.print( part);	
+     	    	System.out.print("\n");
      	    	sendpacket( part);
      	    }
 

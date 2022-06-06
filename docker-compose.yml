@@ -120,6 +120,9 @@ services:
         - ./tshark/bin/log-generator.jar:/var/log/java/log-generator-0.0.2.jar
       networks:
         - elk
+      cap_add:
+        - NET_ADMIN
+        - NET_RAW
 
 networks:
   elk:
