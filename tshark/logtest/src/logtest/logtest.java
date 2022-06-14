@@ -26,13 +26,19 @@ public class logtest {
 	
     public static void main(String[] args) throws InterruptedException, IOException {
  
+    	
+    	
+
+    	
 
             //String cmd = "tshark -r /data/pcap/scada.pcapng -T ek | jq '.'";
-            //String cmd = "C:\\Program Files\\Wireshark\\tshark.exe -r C:\\Users\\65935\\Downloads\\docker-elk-main\\tshark\\logtest\\log\\scada.pcapng -T ek "     ;    
-            //Process p = Runtime.getRuntime().exec(cmd);
-            //BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//            String cmd = "C:\\Program Files\\Wireshark\\tshark.exe -r C:\\Users\\65935\\Downloads\\docker-elk-main\\tshark\\logtest\\log\\scada.pcapng -T ek "     ;    
+//            Process p = Runtime.getRuntime().exec(cmd);
+//            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
     	
-//            
+//           
+    	
+
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
           	StringBuilder everything = new StringBuilder();
      	    String lineeach;
@@ -40,7 +46,6 @@ public class logtest {
      	       everything.append(lineeach);
      	    }
      	    System.out.print("---------everything-----------");
-     	    //System.out.print( everything.toString());
 
      	    String every= everything.toString();
      	    
@@ -49,22 +54,25 @@ public class logtest {
      	    every= every.replaceAll("\\}\\{", "\\}\\}\\{\\{");
 
      	    String[] parts = every.split("\\}\\{");
+     	    
+        	getCount();
      	    for (String part: parts){
-     	    	if (part.contains("_type") && part.contains("doc")){
+     	    	if (part.contains("_type") && (part.contains("doc")||part.contains("pcap_file") )){
      	    		continue;
      	    	}
-     	    	
+//     	    	System.out.print("----------------");
+//     	    	 System.out.print(part);
      	    	
      	    	int strart = part.indexOf("timestamp");
      	    	if (strart >0) {
      	    		int end = part.indexOf("\",");
-     	    		String timestring = part.substring(strart+12, end);
-
+     	    		String timestring = part.substring(strart+12+1, end);
+     	    		//System.out.print(timestring);
      	    		Instant instant = Instant.ofEpochMilli(Long.parseLong(timestring));
      	    		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
      	    		String dateAsText = fmt.format(instant.atZone(ZoneId.systemDefault())).toString();
-	     	    	part= part.replaceAll("timestamp", "@TimeStamp");
+	     	    	part= part.replaceAll("timestamp", "@timestamp");
 	     	    	part= part.replaceAll(timestring, dateAsText);
 	     	    	System.out.print("\n");
 	     	    	
@@ -74,14 +82,14 @@ public class logtest {
      	    	System.out.print("\n");
      	    	sendpacket( part);
      	    }
-
+		
     }
     
     
     public static void sendpacket(String data){
     	try {
-    		URL url = new URL(String.format("http://192.168.65.2:9200/test_index2/_doc/%d",count));
     		count+=1;
+    		URL url = new URL(String.format("http://172.18.240.131:9200/test_index1/_doc/%d",count));
     		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
     		httpConn.setRequestMethod("PUT");
 
@@ -103,10 +111,39 @@ public class logtest {
     				: httpConn.getErrorStream();
     		Scanner s = new Scanner(responseStream).useDelimiter("\\A");
     		String response = s.hasNext() ? s.next() : "";
+
     		System.out.println(response);
 	    }catch(Exception e) {
 	    	System.out.println(e);
 	    }
     }
+    public static void getCount(){
+    	// POST test_index1/_count
+    	try {
+    		URL url = new URL("http://172.18.240.131:9200/test_index1/_count");
+    		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+    		httpConn.setRequestMethod("POST");
 
+    		byte[] message = ("elastic:changeme").getBytes("UTF-8");
+    		String basicAuth = DatatypeConverter.printBase64Binary(message);
+    		httpConn.setRequestProperty("Authorization", "Basic " + basicAuth);
+
+    		InputStream responseStream = httpConn.getResponseCode() / 100 == 2
+    				? httpConn.getInputStream()
+    				: httpConn.getErrorStream();
+    		Scanner s = new Scanner(responseStream).useDelimiter("\\A");
+    		String response = s.hasNext() ? s.next() : "";
+    		int start = response.indexOf("count");
+    		int end = response.indexOf(",");
+    		System.out.println(String.format("%d,%d\n",start,end ));
+    		String response1 = response.substring(start+7, end);
+    		count = Integer.valueOf(response1);
+    		
+    		System.out.println(response);
+	    }catch(Exception e) {
+	    	System.out.println(e);
+	    }
+    }
+    
+   
 }

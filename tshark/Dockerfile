@@ -7,3 +7,5 @@ VOLUME ["/data/pcap"]
 ADD bin /usr/bin
 WORKDIR /var/log/java
 CMD ["bash"]
+
+
