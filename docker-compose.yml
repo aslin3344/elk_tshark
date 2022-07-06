@@ -106,12 +106,15 @@ services:
 #https://opster.com/es-errors/unknown-key-for-create-index/
 #tshark -r /data/pcap/scada.pcapng -T ek | jq '.' | java -jar log-generator-0.0.2.jar
 
-# tshark -r $(inotifywait -m -e create  ./ | cut -d' '  -f3) -T ek 
-# inotifywait -m -r -e create --format "%e %w %f" ./ |
-#   while read evt dir file; do
-#     echo "$file" 
-# 	tshark -r $file -T ek | jq '.'
-# done
+#tshark -r $(inotifywait -m -e create  ./ | cut -d' '  -f3) -T ek 
+#inotifywait -m -r -e create --format "%e %w %f" /tmp/linweilog |
+#  while read evt dir file; do
+#    echo "$file" 
+#	tshark -r /tmp/linweilog/$file -T ek | jq '.'| java -jar /tmp/linweilog/log-generator-0.0.2.jar
+
+
+# curl -XPOST -u elastic:changeme "host.docker.internal:9200/test_index1/_count"
+
 
 
   tshark:
@@ -123,9 +126,8 @@ services:
          - kibana
       volumes:
         - pcap:/data/pcap
-        - ./scada.pcapng:/data/pcap/scada.pcapng:ro,Z
-        - ./tshark/bin/tshark2es.py:/usr/bin/tshark2es.py
-        - ./tshark/bin/log-generator.jar:/var/log/java/log-generator-0.0.2.jar
+        - ./tshark/bin/log-generator.jar:/var/log/java/log-generator.jar
+        - ./tshark/bin/pcapupdate.sh:/usr/bin/pcapupdate.sh
       networks:
         - elk
       cap_add:

@@ -37,7 +37,8 @@ public class logtest {
 //            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
     	
 //           
-    	
+    		String elasticip = args[0];  
+    		String target = args[1];  
 
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
           	StringBuilder everything = new StringBuilder();
@@ -61,7 +62,7 @@ public class logtest {
      	    		continue;
      	    	}
 //     	    	System.out.print("----------------");
-//     	    	 System.out.print(part);
+  //   	    	System.out.print(part);
      	    	
      	    	int strart = part.indexOf("timestamp");
      	    	if (strart >0) {
@@ -80,16 +81,16 @@ public class logtest {
      	    	
      	    	System.out.print( part);	
      	    	System.out.print("\n");
-     	    	sendpacket( part);
+     	    	sendpacket( part,elasticip, target );
      	    }
 		
     }
     
     
-    public static void sendpacket(String data){
+    public static void sendpacket(String data,String elasticip, String target ){
     	try {
     		count+=1;
-    		URL url = new URL(String.format("http://172.18.240.131:9200/test_index1/_doc/%d",count));
+    		URL url = new URL(String.format("http://%s:9200/%s/_doc/%d",elasticip, target, count));
     		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
     		httpConn.setRequestMethod("PUT");
 
