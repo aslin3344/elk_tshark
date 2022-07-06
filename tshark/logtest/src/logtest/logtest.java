@@ -40,7 +40,7 @@ public class logtest {
 //           
     		String elasticip = args[0];  
     		String target = args[1];  
-    		if (args[2] != null ) {
+    		if (args.length>2) {
     			debug =true;
     		}
     		
