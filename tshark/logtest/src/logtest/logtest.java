@@ -56,7 +56,7 @@ public class logtest {
 
      	    String[] parts = every.split("\\}\\{");
      	    
-        	getCount();
+        	getCount(elasticip, target);
      	    for (String part: parts){
      	    	if (part.contains("_type") && (part.contains("doc")||part.contains("pcap_file") )){
      	    		continue;
@@ -118,10 +118,11 @@ public class logtest {
 	    	System.out.println(e);
 	    }
     }
-    public static void getCount(){
+    public static void getCount(String elasticip, String target){
     	// POST test_index1/_count
+    	System.out.println("POST test_index1/_count");
     	try {
-    		URL url = new URL("http://172.18.240.131:9200/test_index1/_count");
+    		URL url = new URL(String.format("http://%s:9200/%s/_count",elasticip, target));
     		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
     		httpConn.setRequestMethod("POST");
 
