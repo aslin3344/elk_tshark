@@ -21,6 +21,7 @@ import javax.xml.bind.DatatypeConverter;
 
 public class logtest {
 	private static int count = 0;
+	private static boolean debug = false;
 
 	//tshark -r /data/pcap/scada.pcapng -T ek | jq '.' | java -jar log-generator-0.0.2.jar
 	
@@ -39,14 +40,18 @@ public class logtest {
 //           
     		String elasticip = args[0];  
     		String target = args[1];  
-
+    		if (args[2] != null ) {
+    			debug =true;
+    		}
+    		
+    		
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
           	StringBuilder everything = new StringBuilder();
      	    String lineeach;
      	    while( (lineeach = in.readLine()) != null) {
      	       everything.append(lineeach);
      	    }
-     	    System.out.print("---------everything-----------");
+     	    System.out.print("---------everything-----------\n");
 
      	    String every= everything.toString();
      	    
@@ -75,12 +80,13 @@ public class logtest {
      	    		String dateAsText = fmt.format(instant.atZone(ZoneId.systemDefault())).toString();
 	     	    	part= part.replaceAll("timestamp", "@timestamp");
 	     	    	part= part.replaceAll(timestring, dateAsText);
-	     	    	System.out.print("\n");
+	     	    	
 	     	    	
      	    	}
-     	    	
-     	    	System.out.print( part);	
-     	    	System.out.print("\n");
+     	    	if (debug ==true){
+	     	    	System.out.print( part);	
+	     	    	System.out.print("\n");
+     	    	}
      	    	sendpacket( part,elasticip, target );
      	    }
 		
@@ -112,15 +118,15 @@ public class logtest {
     				: httpConn.getErrorStream();
     		Scanner s = new Scanner(responseStream).useDelimiter("\\A");
     		String response = s.hasNext() ? s.next() : "";
-
     		System.out.println(response);
+    		
 	    }catch(Exception e) {
 	    	System.out.println(e);
 	    }
     }
     public static void getCount(String elasticip, String target){
     	// POST test_index1/_count
-    	System.out.println("POST test_index1/_count");
+    	
     	try {
     		URL url = new URL(String.format("http://%s:9200/%s/_count",elasticip, target));
     		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
@@ -140,8 +146,9 @@ public class logtest {
     		System.out.println(String.format("%d,%d\n",start,end ));
     		String response1 = response.substring(start+7, end);
     		count = Integer.valueOf(response1);
-    		
+    	
     		System.out.println(response);
+    
 	    }catch(Exception e) {
 	    	System.out.println(e);
 	    }
