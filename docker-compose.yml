@@ -97,6 +97,7 @@ services:
 #https://github.com/LianDuanTrain/Elastic/tree/main/1%20Introduction%20and%20Installation/dockerComposeEKLF
 #https://github.com/danielguerra69/tshark-elasticsearch
 #https://opster.com/es-errors/unknown-key-for-create-index/
+#https://www.elastic.co/blog/analyzing-network-packets-with-wireshark-elasticsearch-and-kibana
 
 #curl -XGET -u elastic:changeme "http://localhost:9200/test_index2/_search" -H "Content-Type: application/json" -d "{}"
 #https://curlconverter.com/#python

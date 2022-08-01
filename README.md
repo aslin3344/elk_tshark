@@ -448,3 +448,70 @@ See the following Wiki pages:
 [ls-docker]: https://www.elastic.co/guide/en/logstash/current/docker-config.html
 
 [upgrade]: https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+index generatation 
+PUT /test7
+{
+  
+  "mappings": {
+
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date_nanos"
+        },
+        "layers": {
+          "properties": {
+            "frame": {
+              "properties": {
+                "frame_frame_len": {
+                  "type": "long"
+                },
+                "frame_frame_protocols": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "ip": {
+              "properties": {
+                "ip_ip_src": {
+                  "type": "ip"
+                },
+                "ip_ip_dst": {
+                  "type": "ip"
+                }
+              }
+            },
+            "udp": {
+              "properties": {
+                "udp_udp_srcport": {
+                  "type": "integer"
+                },
+                "udp_udp_dstport": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  
+}
+
+
+
